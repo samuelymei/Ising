@@ -1,0 +1,5 @@
+constant.o : constant.f90 precision_m.o 
+ising2d.o : ising2d.f90 precision_m.o 
+Ising.o : Ising.f90 ising2d.o precision_m.o 
+lib.o : lib.f90 precision_m.o 
+precision_m.o : precision_m.f90 
