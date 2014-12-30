@@ -29,7 +29,7 @@ program Ising
 
   real( kind = fp_kind ) :: MyUniformRand
   
-  character( len = 50 ) :: outstring
+  character( len = : ), allocatable :: outstring
 
 ! initial MPI environment
   call MPI_Init ( ierr )
@@ -81,6 +81,7 @@ program Ising
 ! gather energies for exchange
     call MPI_Gather( replica%Epot, 1, MPI_REAL8, energies, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr )
 !    if(indexEx == 10000)then
+!      outstring = 'Replica 9999'
 !      write(outstring,*)mytid
 !      outstring = 'Replica '//trim(adjustl(outstring))
 !      call replica%PrintState(outstring)
