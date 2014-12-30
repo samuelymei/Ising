@@ -2,22 +2,22 @@ module Ising2d_mod
   use precision_m
   implicit none
   private
-  public :: IsingSys_t, constructor, destructor
+  public :: IsingSys_t, Constructor
   type particle_t
-    integer( kind=4 ) :: iSpin
-    integer( kind=4 ) :: nNeighbor
-    integer( kind=4 ), pointer :: neighbors_p(:) => null()
-    real( kind=fp_kind ) :: energy
+    integer( kind = 4 ) :: iSpin
+    integer( kind = 4 ) :: nNeighbor
+    integer( kind = 4 ), pointer :: neighbors_p(:) => null()
+    real( kind = fp_kind ) :: energy
   end type particle_t
 
   type IsingSys_t
-    integer(kind=4) :: nx, ny
-    integer(kind=4) :: nParticles
+    integer( kind =4 ) :: nx, ny
+    integer( kind =4 ) :: nParticles
     type(particle_t), allocatable :: particles(:)
-    real(kind=fp_kind) :: Epot  ! \sigma(i,j>i) -0.5*ispin(i)*ispin(j) + \sigma(i) B*ispin(i)
-    real(kind=fp_kind) :: B
-    real(kind=fp_kind) :: temperature
-    integer(kind=4) :: nTotalSpin
+    real( kind = fp_kind ) :: ePot  ! \sigma(i,j>i) -0.5*ispin(i)*ispin(j) + \sigma(i) B*ispin(i)
+    real( kind = fp_kind ) :: bExt
+    real( kind = fp_kind ) :: temperature
+    integer( kind = 4 )  :: nTotalSpin
 
   contains
     procedure :: Initialize
@@ -27,40 +27,35 @@ module Ising2d_mod
     procedure :: GetEnergy
     procedure :: GetTotalSpin
     procedure, public :: MCmove
-    procedure :: Finalize
+    procedure, public :: Finalize
     procedure, public :: PrintState
+    procedure, public :: ChangeTemperature
   end type IsingSys_t
 
   contains
-    function Destructor()
-      implicit none
-      type ( IsingSys_t ) :: Destructor
-      call Destructor%finalize()
-    end function Destructor
-
     function Constructor( nrow, ncol, imean, Bext, temper )
       implicit none
       type ( IsingSys_t ) :: Constructor
-      integer(kind=4), intent(in) :: nrow, ncol
-      integer(kind=4), intent(in) :: imean
-      real(kind=fp_kind), intent(in) :: Bext, temper
+      integer( kind = 4 ) , intent(in) :: nrow, ncol
+      integer( kind = 4 ) , intent(in) :: imean
+      real( kind = fp_kind ), intent(in) :: Bext, temper
       call Constructor%initialize( nrow, ncol, imean, Bext, temper )
     end function Constructor
 
     subroutine Initialize( this, nrow, ncol, imean, Bext, temper )
       implicit none
       class( IsingSys_t ) :: this
-      integer(kind=4), intent(in) :: nrow, ncol
-      integer(kind=4), intent(in) :: imean
-      real(kind=fp_kind), intent(in) :: Bext, temper
-      integer(kind=4) :: indexP
-      integer(kind=4) :: indexX, indexY
-      real(kind=fp_kind) :: myUniformRand
-      real(kind=fp_kind) :: rannum
+      integer( kind = 4 ) , intent(in) :: nrow, ncol
+      integer( kind = 4 ) , intent(in) :: imean
+      real( kind = fp_kind ), intent(in) :: Bext, temper
+      integer( kind = 4 )  :: indexP
+      integer( kind = 4 )  :: indexX, indexY
+      real( kind = fp_kind ) :: myUniformRand
+      real( kind = fp_kind ) :: rannum
       this%nx = nrow
       this%ny = ncol
       this%nParticles = this%nx * this%ny
-      this%B = Bext
+      this%bExt = Bext
       this%temperature = temper
       allocate(this%particles(this%nParticles))
       if ( imean == 1 ) then
@@ -82,15 +77,15 @@ module Ising2d_mod
       do indexP = 1, this%nParticles
         call CalcIndivEner( this, indexP )
       end do
-      call GetEnergy( this, this%Epot )
+      call GetEnergy( this, this%ePot )
       call GetTotalSpin( this, this%nTotalSpin )
     end subroutine Initialize
  
     subroutine FindNeighbor(this)
       implicit none
       class( IsingSys_t ) :: this
-      integer(kind=4) :: indexP
-      integer(kind=4) :: indexX, indexY
+      integer( kind = 4 )  :: indexP
+      integer( kind = 4 )  :: indexX, indexY
  
       do indexY = 1, this%ny
         do indexX = 1, this%nx
@@ -154,10 +149,10 @@ module Ising2d_mod
     subroutine CalcIndivEner( this, indexP )
       implicit none
       class( IsingSys_t ) :: this
-      integer(kind=4), intent(in) :: indexP
-      real(kind=fp_kind) :: indivEner
-      integer(kind=4) :: indexN
-      this%particles(indexP)%energy = this%B * this%particles(indexP)%iSpin
+      integer( kind = 4 ) , intent(in) :: indexP
+      real( kind = fp_kind ) :: indivEner
+      integer( kind = 4 )  :: indexN
+      this%particles(indexP)%energy = this%bExt * this%particles(indexP)%iSpin
       do indexN = 1, this%particles(indexP)%nNeighbor
         this%particles(indexP)%energy = this%particles(indexP)%energy - 0.5* this%particles(indexP)%iSpin * &
                    & this%particles(this%particles(indexP)%neighbors_p(indexN))%iSpin
@@ -167,12 +162,12 @@ module Ising2d_mod
     subroutine GetEnergyQuick( this, energy )
       implicit none
       class( IsingSys_t ) :: this
-      real(kind=fp_kind), intent(out) :: energy
-      integer(kind=4) :: indexP
+      real( kind = fp_kind ), intent(out) :: energy
+      integer( kind = 4 )  :: indexP
       energy = 0.d0
       do indexP = 1, this%nParticles
         energy = energy + this%particles(indexP)%energy
-        energy = energy - 0.5 * this%B * this%particles(indexP)%iSpin
+        energy = energy - 0.5 * this%bExt * this%particles(indexP)%iSpin
       end do
       energy = energy/2.d0
     end subroutine GetEnergyQuick
@@ -180,9 +175,9 @@ module Ising2d_mod
     subroutine GetEnergy( this, energy )
       implicit none
       class( IsingSys_t ) :: this
-      real(kind=fp_kind), intent(out) :: energy
-      integer(kind=4) :: indexX, indexY
-      integer(kind=4) :: indexP, indexN
+      real( kind = fp_kind ), intent(out) :: energy
+      integer( kind = 4 )  :: indexX, indexY
+      integer( kind = 4 )  :: indexP, indexN
       energy = 0.d0
       do indexX = 1, this%nx
         do indexY = 1, this%ny
@@ -192,7 +187,7 @@ module Ising2d_mod
             energy = energy - 0.5* this%particles(indexP)%iSpin &
                                 & * this%particles(this%particles(indexP)%neighbors_p(indexN))%iSpin
           end do
-          energy = energy + this%B * this%particles(indexP)%iSpin
+          energy = energy + this%bExt * this%particles(indexP)%iSpin
         end do
       end do
     end subroutine GetEnergy
@@ -200,18 +195,18 @@ module Ising2d_mod
     subroutine GetTotalSpin( this, nSpin )
       implicit none
       class( IsingSys_t ) :: this
-      integer(kind=4), intent(out) :: nSpin
+      integer( kind = 4 ) , intent(out) :: nSpin
       nSpin = sum(this%particles(:)%iSpin)
     end subroutine GetTotalSpin
 
     subroutine MCmove( this )
       implicit none
       class ( IsingSys_t ) :: this
-      integer(kind=4) :: indexP, indexN
-      real(kind=4) :: deltaE
-      real(kind=fp_kind) :: myUniformRand
+      integer( kind = 4 )  :: indexP, indexN
+      real( kind = fp_kind ) :: deltaE
+      real( kind = fp_kind ) :: myUniformRand
       logical :: iAccept
-      real(kind=fp_kind) :: rannum
+      real( kind = fp_kind ) :: rannum
       indexP = myUniformRand() * this%nParticles + 1
       deltaE = -2 * this%particles(indexP)%energy
       if( deltaE < 0.d0 ) then
@@ -231,20 +226,29 @@ module Ising2d_mod
         do indexN = 1, this%particles(indexP)%nNeighbor
           call calcIndivEner(this,this%particles(indexP)%neighbors_p(indexN))
         end do
-        this%Epot = this%Epot + deltaE
+        this%ePot = this%ePot + deltaE
       end if
     end subroutine MCmove
  
     subroutine Finalize( this )
       implicit none
       class( IsingSys_t ) :: this
-      integer(kind=4) :: indexP
+      integer( kind = 4 )  :: indexP
       deallocate(this%particles)
     end subroutine Finalize
 
-    subroutine PrintState( this )
+    subroutine PrintState( this, comments )
       implicit none
       class( IsingSys_t ) :: this
-      write( *, '(3F10.3,I10)' ) this%Epot, this%B, this%temperature, this%nTotalSpin
+      character( len = * ) :: comments
+      write( *, '(A,3F10.3,I10)' ) trim(adjustl(comments)), this%ePot, this%bExt, this%temperature, this%nTotalSpin
     end subroutine PrintState
+
+    subroutine ChangeTemperature( this, tNew )
+      implicit none
+      class( IsingSys_t ) :: this
+      real( kind = fp_kind ) :: tNew
+      this%temperature = tNew
+    end subroutine ChangeTemperature
+
 end module Ising2d_mod

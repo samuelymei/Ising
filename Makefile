@@ -1,7 +1,7 @@
 .SUFFIXES: 
 .SUFFIXES: .f90 .o
 
-FC = ifort
+FC = mpif90
 FFLAGS = -CB
 INCLUDE = 
 LIBS = 
