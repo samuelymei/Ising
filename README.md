@@ -1,2 +1,2 @@
-Ising
+Ising Module
 =====

@@ -1,3 +1,10 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! A 2D Ising model                                                       !
+! Written by                                                             !
+!                                   Ye Mei                               !
+!                        East China Normal University                    !
+!                                 12/30/2014                             !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module Ising2d_mod
   use precision_m
   implicit none
@@ -24,7 +31,7 @@ module Ising2d_mod
     procedure :: FindNeighbor
     procedure :: CalcIndivEner
     procedure :: GetEnergyQuick
-    procedure :: GetEnergy
+    procedure, public :: GetEnergy
     procedure :: GetTotalSpin
     procedure, public :: MCmove
     procedure, public :: Finalize

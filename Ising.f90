@@ -19,7 +19,7 @@ program Ising
   real( kind = fp_kind ), allocatable :: temperature_target( : )
   real( kind = fp_kind ) :: newTemperature
 
-  integer( kind = 4 ) :: numEx = 100000
+  integer( kind = 4 ) :: numEx = 1000000
   integer( kind = 4 ) :: numRelax = 50
   integer( kind = 4 ) :: indexP, indexEx, indexMove
   logical :: IsOdd
@@ -63,7 +63,7 @@ program Ising
 !  print*,' Process ID ', mytid, ' Temperature:', currTemperature
 
   bExt = 0.d0
-  replica = constructor( 10, 10, 1, bExt, currTemperature )
+  replica = constructor( 10, 10, 2, bExt, currTemperature )
 
 ! print initial energies
   call MPI_Gather( replica%Epot, 1, MPI_REAL8, energies, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr )
@@ -80,13 +80,13 @@ program Ising
 
 ! gather energies for exchange
     call MPI_Gather( replica%Epot, 1, MPI_REAL8, energies, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr )
-    if(indexEx == 10000)then
-      write(outstring,*)mytid
-      outstring = 'Replica '//trim(adjustl(outstring))
-      call replica%PrintState(outstring)
-      if(master) write(*,'(8I10)') temperature_index
-      if(master) write(*,'(8F10.3)') energies( temperature_index )
-    end if
+!    if(indexEx == 10000)then
+!      write(outstring,*)mytid
+!      outstring = 'Replica '//trim(adjustl(outstring))
+!      call replica%PrintState(outstring)
+!      if(master) write(*,'(8I10)') temperature_index
+!      if(master) write(*,'(8F10.3)') energies( temperature_index )
+!    end if
     if(master)write(88,'(I10,8F10.3)') indexEx, energies(temperature_index)    
 
     if( master ) then
