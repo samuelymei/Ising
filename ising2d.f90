@@ -209,7 +209,8 @@ module Ising2d_mod
     subroutine MCmove( this )
       implicit none
       class ( IsingSys_t ) :: this
-      integer( kind = 4 )  :: indexP, indexN
+      integer( kind = 4 )  :: indexP ! index for particles
+      integer( kind = 4 )  :: indexN ! index for neighbors
       real( kind = fp_kind ) :: deltaE
       real( kind = fp_kind ) :: myUniformRand
       logical :: iAccept

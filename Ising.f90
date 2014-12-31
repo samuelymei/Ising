@@ -13,6 +13,7 @@ program Ising
   real( kind = fp_kind ) :: bExt
   real( kind = fp_kind ), allocatable :: temperatures( : )
   real( kind = fp_kind ), allocatable :: energies( : )
+  integer( kind = 4 ), allocatable :: nTotalSpins( : )
   real( kind = fp_kind ), parameter :: T_Max = 3, T_Min = 1
   real( kind = fp_kind ) :: currTemperature
   integer( kind = 4 ), allocatable :: temperature_index( : )
@@ -42,6 +43,7 @@ program Ising
   if( master ) then
     allocate( temperatures( numprocs ) )
     allocate( energies( numprocs ) )
+    allocate( nTotalSpins( numprocs ) )
     allocate( temperature_index( numprocs ) )
     allocate( exchangeRate( numprocs ) )
     allocate( willBeExchanged( numprocs ) )
@@ -62,11 +64,12 @@ program Ising
   
 !  print*,' Process ID ', mytid, ' Temperature:', currTemperature
 
-  bExt = 0.d0
+  bExt = 0.5d0
   replica = constructor( 10, 10, 2, bExt, currTemperature )
 
 ! print initial energies
   call MPI_Gather( replica%Epot, 1, MPI_REAL8, energies, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr )
+  call MPI_Gather( replica%nTotalSpin, 1, MPI_INTEGER, nTotalSpins, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr )
   IndexEx = 0 
   if( master ) then
     call printStates( numprocs, IndexEx, energies )
@@ -80,6 +83,7 @@ program Ising
 
 ! gather energies for exchange
     call MPI_Gather( replica%Epot, 1, MPI_REAL8, energies, 1, MPI_REAL8, 0, MPI_COMM_WORLD, ierr )
+    call MPI_Gather( replica%nTotalSpin, 1, MPI_INTEGER, nTotalSpins, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr )
 !    if(indexEx == 10000)then
 !      outstring = 'Replica 9999'
 !      write(outstring,*)mytid
@@ -89,6 +93,7 @@ program Ising
 !      if(master) write(*,'(8F10.3)') energies( temperature_index )
 !    end if
     if(master)write(88,'(I10,8F10.3)') indexEx, energies(temperature_index)    
+    if(master)write(99,'(I10,8I10)') indexEx, nTotalSpins(temperature_index)    
 
     if( master ) then
       if ( IsOdd( indexEx ) ) then
@@ -174,6 +179,7 @@ program Ising
   if( master ) then
     deallocate( temperatures )
     deallocate( energies )
+    deallocate( nTotalSpins )
     deallocate( temperature_index )
     deallocate( exchangeRate )
     deallocate( willBeExchanged )
