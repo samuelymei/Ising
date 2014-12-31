@@ -13,14 +13,14 @@ module Ising2d_mod
   type particle_t
     integer( kind = 4 ) :: iSpin
     integer( kind = 4 ) :: nNeighbor
-    integer( kind = 4 ), pointer :: neighbors_p(:) => null()
+    integer( kind = 4 ), allocatable :: neighbors(:)
     real( kind = fp_kind ) :: energy
   end type particle_t
 
   type IsingSys_t
     integer( kind =4 ) :: nx, ny
     integer( kind =4 ) :: nParticles
-    type(particle_t), allocatable :: particles(:)
+    type( particle_t ), allocatable :: particles(:)
     real( kind = fp_kind ) :: ePot  ! \sigma(i,j>i) -0.5*ispin(i)*ispin(j) + \sigma(i) B*ispin(i)
     real( kind = fp_kind ) :: bExt
     real( kind = fp_kind ) :: temperature
@@ -99,55 +99,55 @@ module Ising2d_mod
           indexP = (indexY - 1) * this%nx + indexX
           if ( indexX == 1 .and. indexY == 1 ) then
             this%particles(indexP)%nNeighbor = 2
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP + 1
-            this%particles(indexP)%neighbors_p(2) = indexP + this%nx
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP + 1
+            this%particles(indexP)%neighbors(2) = indexP + this%nx
           else if ( indexX == this%nx .and. indexY == this%ny ) then
             this%particles(indexP)%nNeighbor = 2
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP - 1
-            this%particles(indexP)%neighbors_p(2) = indexP - this%nx
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP - 1
+            this%particles(indexP)%neighbors(2) = indexP - this%nx
           else if ( indexX == 1 .and. indexY == this%ny ) then
             this%particles(indexP)%nNeighbor = 2
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP + 1
-            this%particles(indexP)%neighbors_p(2) = indexP - this%nx
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP + 1
+            this%particles(indexP)%neighbors(2) = indexP - this%nx
           else if ( indexX == this%nx .and. indexY == 1 ) then
             this%particles(indexP)%nNeighbor = 2
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP - 1
-            this%particles(indexP)%neighbors_p(2) = indexP + this%nx
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP - 1
+            this%particles(indexP)%neighbors(2) = indexP + this%nx
           else if ( indexX == 1 .and. indexY > 1 .and. indexY < this%ny ) then
             this%particles(indexP)%nNeighbor = 3
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP - this%nx
-            this%particles(indexP)%neighbors_p(2) = indexP + 1
-            this%particles(indexP)%neighbors_p(3) = indexP + this%nx
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP - this%nx
+            this%particles(indexP)%neighbors(2) = indexP + 1
+            this%particles(indexP)%neighbors(3) = indexP + this%nx
           else if ( indexX == this%nx .and. indexY > 1 .and. indexY < this%ny ) then
             this%particles(indexP)%nNeighbor = 3
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP - this%nx
-            this%particles(indexP)%neighbors_p(2) = indexP - 1
-            this%particles(indexP)%neighbors_p(3) = indexP + this%nx
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP - this%nx
+            this%particles(indexP)%neighbors(2) = indexP - 1
+            this%particles(indexP)%neighbors(3) = indexP + this%nx
           else if ( indexX > 1 .and. indexX < this%nx .and. indexY == 1 ) then
             this%particles(indexP)%nNeighbor = 3
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP - 1
-            this%particles(indexP)%neighbors_p(2) = indexP + this%nx
-            this%particles(indexP)%neighbors_p(3) = indexP + 1
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP - 1
+            this%particles(indexP)%neighbors(2) = indexP + this%nx
+            this%particles(indexP)%neighbors(3) = indexP + 1
           else if ( indexX > 1 .and. indexX < this%nx .and. indexY == this%ny ) then
             this%particles(indexP)%nNeighbor = 3
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP - 1
-            this%particles(indexP)%neighbors_p(2) = indexP - this%nx
-            this%particles(indexP)%neighbors_p(3) = indexP + 1
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP - 1
+            this%particles(indexP)%neighbors(2) = indexP - this%nx
+            this%particles(indexP)%neighbors(3) = indexP + 1
           else
             this%particles(indexP)%nNeighbor = 4
-            allocate(this%particles(indexP)%neighbors_p(this%particles(indexP)%nNeighbor))
-            this%particles(indexP)%neighbors_p(1) = indexP - 1
-            this%particles(indexP)%neighbors_p(2) = indexP - this%nx
-            this%particles(indexP)%neighbors_p(3) = indexP + 1
-            this%particles(indexP)%neighbors_p(4) = indexP + this%nx
+            allocate(this%particles(indexP)%neighbors(this%particles(indexP)%nNeighbor))
+            this%particles(indexP)%neighbors(1) = indexP - 1
+            this%particles(indexP)%neighbors(2) = indexP - this%nx
+            this%particles(indexP)%neighbors(3) = indexP + 1
+            this%particles(indexP)%neighbors(4) = indexP + this%nx
           end if
         end do
       end do
@@ -162,7 +162,7 @@ module Ising2d_mod
       this%particles(indexP)%energy = this%bExt * this%particles(indexP)%iSpin
       do indexN = 1, this%particles(indexP)%nNeighbor
         this%particles(indexP)%energy = this%particles(indexP)%energy - 0.5* this%particles(indexP)%iSpin * &
-                   & this%particles(this%particles(indexP)%neighbors_p(indexN))%iSpin
+                   & this%particles(this%particles(indexP)%neighbors(indexN))%iSpin
       end do
     end subroutine CalcIndivEner
  
@@ -190,9 +190,9 @@ module Ising2d_mod
         do indexY = 1, this%ny
           indexP = (indexY - 1) * this%nx + indexX
           do indexN = 1, this%particles(indexP)%nNeighbor
-            if( this%particles(indexP)%neighbors_p(indexN) <= indexP ) cycle
+            if( this%particles(indexP)%neighbors(indexN) <= indexP ) cycle
             energy = energy - 0.5* this%particles(indexP)%iSpin &
-                                & * this%particles(this%particles(indexP)%neighbors_p(indexN))%iSpin
+                                & * this%particles(this%particles(indexP)%neighbors(indexN))%iSpin
           end do
           energy = energy + this%bExt * this%particles(indexP)%iSpin
         end do
@@ -232,7 +232,7 @@ module Ising2d_mod
         this%particles(indexP)%iSpin = - this%particles(indexP)%iSpin
         this%particles(indexP)%energy = - this%particles(indexP)%energy
         do indexN = 1, this%particles(indexP)%nNeighbor
-          call calcIndivEner(this,this%particles(indexP)%neighbors_p(indexN))
+          call calcIndivEner(this,this%particles(indexP)%neighbors(indexN))
         end do
         this%ePot = this%ePot + deltaE
       end if
