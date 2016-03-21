@@ -5,7 +5,7 @@
 !                        East China Normal University                    !
 !                                 12/30/2014                             !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-module Ising2d_mod
+module Ising2d_m
   use precision_m
   implicit none
   private
@@ -50,6 +50,7 @@ module Ising2d_mod
     end function Constructor
 
     subroutine Initialize( this, nrow, ncol, imean, Bext, temper )
+      use random_m
       implicit none
       class( IsingSys_t ) :: this
       integer( kind = 4 ) , intent(in) :: nrow, ncol
@@ -57,7 +58,6 @@ module Ising2d_mod
       real( kind = fp_kind ), intent(in) :: Bext, temper
       integer( kind = 4 )  :: indexP
       integer( kind = 4 )  :: indexX, indexY
-      real( kind = fp_kind ) :: myUniformRand
       real( kind = fp_kind ) :: rannum
       this%nx = nrow
       this%ny = ncol
@@ -207,28 +207,28 @@ module Ising2d_mod
     end subroutine GetTotalSpin
 
     subroutine MCmove( this )
+      use random_m
       implicit none
       class ( IsingSys_t ) :: this
       integer( kind = 4 )  :: indexP ! index for particles
       integer( kind = 4 )  :: indexN ! index for neighbors
       real( kind = fp_kind ) :: deltaE
-      real( kind = fp_kind ) :: myUniformRand
       logical :: iAccept
       real( kind = fp_kind ) :: rannum
       indexP = myUniformRand() * this%nParticles + 1
       deltaE = -2 * this%particles(indexP)%energy
-      if( deltaE < 0.d0 ) then
+      if( deltaE <= 0.d0 ) then
         iAccept = .True.
       else
         rannum = myUniformRand()
-        if ( exp(-deltaE/this%temperature) > rannum ) then
+        if ( exp( - deltaE / this%temperature ) > rannum ) then
           iAccept = .True.
         else
           iAccept = .False.
         end if
       end if
       if ( iAccept ) then
-        this%nTotalSpin = this%nTotalSpin - (this%particles(indexP)%iSpin)*2
+        this%nTotalSpin = this%nTotalSpin - this%particles(indexP)%iSpin * 2
         this%particles(indexP)%iSpin = - this%particles(indexP)%iSpin
         this%particles(indexP)%energy = - this%particles(indexP)%energy
         do indexN = 1, this%particles(indexP)%nNeighbor
@@ -259,4 +259,4 @@ module Ising2d_mod
       this%temperature = tNew
     end subroutine ChangeTemperature
 
-end module Ising2d_mod
+end module Ising2d_m

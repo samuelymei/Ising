@@ -1,6 +1,7 @@
 program Ising
   use precision_m
-  use Ising2d_mod
+  use Ising2d_m
+  use random_m
   use mpi
   implicit none
   integer ( kind = 4 ) :: ierr
@@ -14,13 +15,13 @@ program Ising
   real( kind = fp_kind ), allocatable :: temperatures( : )
   real( kind = fp_kind ), allocatable :: energies( : )
   integer( kind = 4 ), allocatable :: nTotalSpins( : )
-  real( kind = fp_kind ), parameter :: T_Max = 3, T_Min = 1
+  real( kind = fp_kind ), parameter :: T_Max = 3.d0, T_Min = 1.d0
   real( kind = fp_kind ) :: currTemperature
   integer( kind = 4 ), allocatable :: temperature_index( : )
   real( kind = fp_kind ), allocatable :: temperature_target( : )
   real( kind = fp_kind ) :: newTemperature
 
-  integer( kind = 4 ) :: numEx = 1000000
+  integer( kind = 4 ) :: numEx = 100000
   integer( kind = 4 ) :: numRelax = 50
   integer( kind = 4 ) :: indexP, indexEx, indexMove
   logical :: IsOdd
@@ -28,8 +29,6 @@ program Ising
 
   real( kind = fp_kind ), allocatable :: exchangeRate(:)
 
-  real( kind = fp_kind ) :: MyUniformRand
-  
   character( len = : ), allocatable :: outstring
 
 ! initial MPI environment
@@ -64,7 +63,7 @@ program Ising
   
 !  print*,' Process ID ', mytid, ' Temperature:', currTemperature
 
-  bExt = 0.5d0
+  bExt = 0.0d0
   replica = constructor( 10, 10, 2, bExt, currTemperature )
 
 ! print initial energies
